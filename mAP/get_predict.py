@@ -1,7 +1,12 @@
 import colorsys
 import os
-from timeit import default_timer as timer
+import sys
+sys.path.append("..")
 
+import shutil
+from timeit import default_timer as timer
+import pdb
+p=pdb.set_trace
 import numpy as np
 from keras import backend as K
 from keras.models import load_model
@@ -18,7 +23,7 @@ gpu_num=1
 
 class YOLO(object):
     def __init__(self):
-        self.model_path = '../logs/002/ep021-loss29.330-val_loss29.643.h5' # model path or trained weights path
+        self.model_path = '../logs/002/ep036-loss29.343-val_loss29.638.h5' # model path or trained weights path
         self.anchors_path = '../model_data/yolo_anchors.txt'
         self.classes_path = '../model_data/coco_class.txt'
         self.score = 0.15
@@ -210,26 +215,32 @@ def detect_img(yolo):
     yolo.close_session()
 
 
-def mAP(yolo, imagepath):
+def mAP(yolo,anno_dir):
     '''读取目录图片，图片需要跟truth的完全一致，调用自己训练的模型计算
     '''
+    predir = "./detection-results"
+    if os.path.exists(predir):
+        shutil.rmtree(predir)
+    os.mkdir(predir)
     import cv2
-    for file in os.listdir(imagepath):
-        if not file.endswith(".jpg"):
-            continue
-        imagefile = imagepath + os.sep + file
-        #image = Image.open(imagefile)
-        image = cv2.imread(imagefile)
-        image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-        
-        r_image = yolo.detect_image2(image)
-        print(r_image)
-        prefile = open("./predicted" + os.sep + file.split(".")[0]+".txt", "w")
-        [prefile.write(i+"\n") for i in r_image]
-        prefile.close()
+    with open(anno_dir) as lines:
+        for line in lines:
+            tmp_line=line.split(' ')
+            imagefile=tmp_line[0]
+            file=tmp_line[0].split('/')[-1]
+            #image = Image.open(imagefile)
+            image = cv2.imread(imagefile)
+            image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+            
+            r_image = yolo.detect_image2(image)
+            print(r_image)
+            #p()
+            prefile = open(predir + os.sep + file.split(".")[0]+".txt", "w")
+            [prefile.write(i+"\n") for i in r_image]
+            prefile.close()
         
         
     yolo.close_session()
 
 if __name__ == '__main__':
-    mAP(YOLO(), "./check/map")
+    mAP(YOLO(),"../low_test.txt")
