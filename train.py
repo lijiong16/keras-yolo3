@@ -3,6 +3,13 @@ Retrain the YOLO model for your own dataset.
 """
 
 import numpy as np
+import tensorflow as tf
+from keras.backend.tensorflow_backend import set_session  
+config = tf.ConfigProto()  
+config.gpu_options.per_process_gpu_memory_fraction = 0.5
+set_session(tf.Session(config=config))  
+
+
 import keras.backend as K
 from keras.layers import Input, Lambda
 from keras.models import Model
@@ -14,9 +21,9 @@ from yolo3.utils import get_random_data
 
 
 def _main():
-    annotation_path = 'train.txt'
-    log_dir = 'logs/000/'
-    classes_path = 'model_data/voc_classes.txt'
+    annotation_path = 'low_train.txt'
+    log_dir = 'logs/002/'
+    classes_path = 'model_data/coco_class.txt'
     anchors_path = 'model_data/yolo_anchors.txt'
     class_names = get_classes(classes_path)
     num_classes = len(class_names)
@@ -30,7 +37,7 @@ def _main():
             freeze_body=2, weights_path='model_data/tiny_yolo_weights.h5')
     else:
         model = create_model(input_shape, anchors, num_classes,
-            freeze_body=2, weights_path='model_data/yolo_weights.h5') # make sure you know what you freeze
+            freeze_body=2, weights_path='logs/001/ep003-loss29.383-val_loss29.811.h5')#('model_data/yolo_weights.h5') # make sure you know what you freeze
 
     logging = TensorBoard(log_dir=log_dir)
     checkpoint = ModelCheckpoint(log_dir + 'ep{epoch:03d}-loss{loss:.3f}-val_loss{val_loss:.3f}.h5',

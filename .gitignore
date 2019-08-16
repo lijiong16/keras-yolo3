@@ -5,6 +5,9 @@
 logs/
 *_test.py
 
+mAP/ground-truth
+mAP/predicted
+mAP/detection-results
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -31,6 +34,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
